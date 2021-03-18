@@ -46,55 +46,32 @@ app.use(session({
   store: new fileStore()
 }));
 
+app.use('/', indexRouter);
+app.use('/users', usersRouter);
+
 function auth(req, res, next) {
-  console.log(req.session)
-  if (!req.session.user) {
+    console.log(req.session)
+    if (!req.session.user) {
     // console.log('This is req.headers: ', req.headers);
-    const authHeader = req.headers.authorization;
-    // console.log('This is authHeader: ',authHeader);
-    // console.log(typeof authHeader);
-    if (!authHeader) {
-        const err = new Error('You are not authenticated.');
-        res.setHeader('WWW-Authenticate', 'Basic');
-        err.status = 401; // unauthorized
-        return next(err);
-    }
-    
-    // for my info
-    // const testAuth = Buffer.from(authHeader.split(' ')[1], 'base64');
-    // console.log('This is testAuth: ', testAuth);
-    // const testAuth2 = Buffer.from(authHeader.split(' ')[1], 'base64').toString();
-    // console.log('This is testAuth2: ', testAuth2);
-    
-    const auth = Buffer.from(authHeader.split(' ')[1], 'base64').toString().split(':');
-    // console.log('This is auth: ', auth)
-    const user = auth[0];
-    const pass = auth[1];
-    if (user === 'admin' && pass === 'password') {
-      req.session.user = 'admin' // 
-      return next(); // authorization successful
+    // remove code regarding authHeader;
+    const err = new Error('You are not authenticated.');
+    err.status = 401; // unauthorized
+    return next(err);
     } else {
-        const err = new Error('You are not authenticated!');
-        res.setHeader('WWW-Authenticate', 'Basic');      
-        err.status = 401;
-        return next(err);
+        if (req.session.user === "authenticated") {
+            return next();
+        } else {
+            const err = new Error('You are not authenticated!');
+            err.status = 401;
+            return next(err);
+        }
     }
-  } else {
-    if (req.session.user === "admin") {
-      return next();
-    } else {
-      const err = new Error('You are not authenticated!');
-      err.status = 401;
-      return next(err);
-    }
-  }
 } 
 
 app.use(auth);
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+
 app.use('/campsites', campsiteRouter);
 app.use('/promotions', promotionRouter);
 app.use('/partners', partnerRouter);
