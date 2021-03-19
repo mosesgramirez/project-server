@@ -6,6 +6,8 @@ const logger = require('morgan');
 const responseTime = require('response-time');
 const session = require('express-session');
 const fileStore = require('session-file-store')(session);
+const passport = require('passport');
+const authenticate = require('./authenticate');
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
@@ -14,6 +16,7 @@ const promotionRouter = require('./routes/promotionRouter');
 const partnerRouter = require('./routes/partnerRouter');
 
 const mongoose = require('mongoose');
+
 const url = 'mongodb://localhost:27017/mucampsite';
 const connect = mongoose.connect(url, {
   useCreateIndex: true,
@@ -46,27 +49,22 @@ app.use(session({
   store: new fileStore()
 }));
 
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
 function auth(req, res, next) {
-    console.log(req.session)
-    if (!req.session.user) {
-    // console.log('This is req.headers: ', req.headers);
-    // remove code regarding authHeader;
-    const err = new Error('You are not authenticated.');
-    err.status = 401; // unauthorized
-    return next(err);
+    console.log(req.user)
+    if (!req.user) {
+        const err = new Error('You are not authenticated.');
+        err.status = 401; // unauthorized
+        return next(err);
     } else {
-        if (req.session.user === "authenticated") {
-            return next();
-        } else {
-            const err = new Error('You are not authenticated!');
-            err.status = 401;
-            return next(err);
-        }
+        return next();
     }
-} 
+}
 
 app.use(auth);
 app.use(express.static(path.join(__dirname, 'public')));
