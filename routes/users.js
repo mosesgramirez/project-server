@@ -1,13 +1,12 @@
 const express = require('express');
 const User = require('../models/user');
-const userRouter = express.Router()
+const usersRouter = express.Router()
 const passport = require('passport');
 const router = express.Router();
 const authenticate = require('../authenticate');
 
 /* GET users listing. */
-userRouter.route('/')
-.get(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+router.get('/', authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     // console.log("req", req);
     console.log("req.user", req.user);
     if (req.user.admin) {
@@ -54,6 +53,7 @@ router.post('/signup', (req, res) => {
 });
 
 router.post('/login', passport.authenticate('local'), (req, res) => {
+    // Removed all previous code from the sessions module.
     const token = authenticate.getToken({_id: req.user._id});
     // Passport takes care of all error handling.
     res.statusCode = 200;

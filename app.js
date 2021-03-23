@@ -5,7 +5,7 @@ const logger = require('morgan');
 const responseTime = require('response-time');
 
 const passport = require('passport');
-const config = require('./config');
+const config = require('./config'); // replaced "authenticate"
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
