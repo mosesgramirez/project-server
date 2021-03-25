@@ -185,14 +185,16 @@ campsiteRouter.route('/:campsiteId/comments/:commentId')
     Campsite.findById(req.params.campsiteId)
     .then(campsite => {
         if (campsite && campsite.comments.id(req.params.commentId)) {
+           
             // Reviewing previous modules. Not sure if we removed this later, so I'm adding it back in.
-            if (req.body.rating) {
-                campsite.comments.id(req.params.commentId).rating = req.body.rating;
-            }
-            if (req.body.text) {
-                campsite.comments.id(req.params.commentId).text = req.body.text;
-            }
-            if (req.user._id.equals(comments.author._id)) {  //new
+            if (req.user._id.equals(campsite.comments.id(req.params.commentId).author._id)) {  //new
+
+                if (req.body.rating) {
+                    campsite.comments.id(req.params.commentId).rating = req.body.rating;
+                }
+                if (req.body.text) {
+                    campsite.comments.id(req.params.commentId).text = req.body.text;
+                }
                 campsite.save()
                 .then(campsite => {
                     res.statusCode = 200;
@@ -200,12 +202,13 @@ campsiteRouter.route('/:campsiteId/comments/:commentId')
                     res.json(campsite);
                 })
                 .catch(err => next(err));
+            } else {
+                err = new Error(`Comment ID does not match author ID.`)
+                err.status = 403;
+                return next(err);
             }
-        } else if (!req.user._id.equals(comments.author._id)) {
-            err = new Error(`Comment ID does not match author ID.`)
-            err.status = 403;
-            return next(err);
-        } else if (!campsite) {
+        }
+         else if (!campsite) {
             err = new Error(`Campsite ${req.params.campsiteId} not found`)
             err.status = 404;
             return next(err);
@@ -221,7 +224,7 @@ campsiteRouter.route('/:campsiteId/comments/:commentId')
     Campsite.findById(req.params.campsiteId)
     .then(campsite => {
         if (campsite && campsite.comments.id(req.params.commentId)) {
-            if (req.user._id.equals(comments.author._id)) {  //new
+            if (req.user._id.equals(campsite.comments.id(req.params.commentId).author._id)) {  //new
                 console.log(campsite.comments);
                 campsite.comments.id(req.params.commentId).remove();
                 campsite.save()
@@ -231,11 +234,11 @@ campsiteRouter.route('/:campsiteId/comments/:commentId')
                     res.json(campsite);
                 })
                 .catch(err => next(err));
-        } else if (!req.user._id.equals(comments.author._id)) {
-            err = new Error(`Comment ID does not match author ID.`)
-            err.status = 403;
-            return next(err);
-        }
+            } else {
+                err = new Error(`Comment ID does not match author ID.`)
+                err.status = 403;
+                return next(err);
+            }
         } else if (!campsite) {
             err = new Error(`Campsite ${req.params.campsiteId} not found`)
             err.status = 404;

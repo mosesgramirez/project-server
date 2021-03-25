@@ -10,7 +10,13 @@ router.get('/', authenticate.verifyUser, authenticate.verifyAdmin, (req, res, ne
     // console.log("req", req);
     console.log("req.user", req.user);
     if (req.user.admin) {
-        return next();
+        User.find()
+        .then(user => {
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'text/plain');
+        res.json(user);
+    })
+    .catch(err => next(err));
     } else {
         err = new Error('You are not authorized to perform this operation.')
         err.status = 403; // unauthorized
