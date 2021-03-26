@@ -1,2 +1,4 @@
 node_modules
 test.js
+server.key
+server.cert
