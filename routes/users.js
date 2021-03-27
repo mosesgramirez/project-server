@@ -4,9 +4,10 @@ const usersRouter = express.Router()
 const passport = require('passport');
 const router = express.Router();
 const authenticate = require('../authenticate');
+const cors = require('./cors');
 
 /* GET users listing. */
-router.get('/', authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+router.get('/', cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     // console.log("req", req);
     console.log("req.user", req.user);
     if (req.user.admin) {
@@ -24,7 +25,7 @@ router.get('/', authenticate.verifyUser, authenticate.verifyAdmin, (req, res, ne
     }
 });
 
-router.post('/signup', (req, res) => {
+router.post('/signup', cors.corsWithOptions, (req, res) => {
     User.register(
         new User({username: req.body.username}),
         req.body.password,
@@ -58,7 +59,7 @@ router.post('/signup', (req, res) => {
     )
 });
 
-router.post('/login', passport.authenticate('local'), (req, res) => {
+router.post('/login', cors.corsWithOptions, passport.authenticate('local'), (req, res) => {
     // Removed all previous code from the sessions module.
     const token = authenticate.getToken({_id: req.user._id});
     // Passport takes care of all error handling.
@@ -67,7 +68,7 @@ router.post('/login', passport.authenticate('local'), (req, res) => {
     res.json({success: true, token: token, status: 'You are successfully logged in.'});
 });
 
-router.get('/logout', (req, res, next) => {
+router.get('/logout', cors.corsWithOptions, (req, res, next) => {
     if (req.session) {
         req.session.destroy();
         res.clearCookie('session-id');
