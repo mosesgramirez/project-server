@@ -2,3 +2,5 @@ node_modules
 test.js
 bin/server.key
 bin/server.cert
+config.js
+public/index.html
